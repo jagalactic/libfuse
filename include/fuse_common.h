@@ -518,6 +518,11 @@ struct fuse_loop_config_v1 {
 #define FUSE_CAP_ALLOW_IDMAP (1ULL << 32)
 
 /**
+ * handle files that use famfs dax fmaps
+ */
+#define FUSE_CAP_DAX_FMAP (1UL << 33)
+
+/**
  * Ioctl flags
  *
  * FUSE_IOCTL_COMPAT: 32bit compat ioctl on 64bit machine
