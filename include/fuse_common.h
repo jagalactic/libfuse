@@ -518,6 +518,11 @@ struct fuse_loop_config_v1 {
 #define FUSE_CAP_NO_EXPORT_SUPPORT (1 << 30)
 
 /**
+ * handle famfs dev_dax_iomap files (i.e. fs-dax style mappings)
+ */
+#define FUSE_CAP_DAX_IOMAP (1<<30)
+
+/**
  * Ioctl flags
  *
  * FUSE_IOCTL_COMPAT: 32bit compat ioctl on 64bit machine
