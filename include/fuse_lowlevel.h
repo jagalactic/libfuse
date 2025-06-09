@@ -1340,7 +1340,7 @@ struct fuse_lowlevel_ops {
 	 * @param req request handle
 	 * @param ino the inode number
 	 */
-	void (*get_fmap) (fuse_req_t req, fuse_ino_t ino);
+	void (*get_fmap) (fuse_req_t req, fuse_ino_t ino, size_t size);
 
 	/**
 	 * Get a daxdev by index

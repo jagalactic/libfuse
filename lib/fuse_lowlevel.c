@@ -2390,10 +2390,10 @@ static void
 do_get_fmap(fuse_req_t req, fuse_ino_t nodeid, const void *inarg)
 {
 	struct fuse_session *se = req->se;
-	(void)inarg;
+	struct fuse_getxattr_in *arg = (struct fuse_getxattr_in *) inarg;
 
 	if (se->op.get_fmap)
-		se->op.get_fmap(req, nodeid);
+		se->op.get_fmap(req, nodeid, arg->size);
 	else
 		fuse_reply_err(req, -EOPNOTSUPP);
 }
