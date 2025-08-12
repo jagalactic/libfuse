@@ -518,7 +518,7 @@ struct fuse_loop_config_v1 {
 /**
  * handle files that use famfs dax fmaps
  */
-#define FUSE_CAP_DAX_FMAP (1<<30)
+#define FUSE_CAP_DAX_FMAP (1<<31)
 
 /**
  * Ioctl flags
