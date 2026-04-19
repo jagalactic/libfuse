@@ -709,9 +709,15 @@ struct fuse_conn_info {
 	uint16_t request_timeout;
 
 	/**
+	 * BPF struct_ops name for DAX fmap extent resolution.
+	 * Set by the server during init() if FUSE_CAP_IOMAP is negotiated.
+	 */
+	char dax_fmap_ops_name[16];
+
+	/**
 	 * For future use.
 	 */
-	uint16_t reserved[31];
+	uint16_t reserved[23];
 };
 
 struct fuse_session;

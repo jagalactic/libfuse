@@ -2906,8 +2906,12 @@ _do_init(fuse_req_t req, const fuse_ino_t nodeid, const void *op_in,
 		outargflags |= FUSE_OVER_IO_URING;
 		enable_io_uring = true;
 	}
-	if (se->conn.want_ext & FUSE_CAP_IOMAP)
+	if (se->conn.want_ext & FUSE_CAP_IOMAP) {
 		outargflags |= FUSE_IOMAP;
+		if (se->conn.dax_fmap_ops_name[0] != '\0')
+			memcpy(outarg.ops_name, se->conn.dax_fmap_ops_name,
+			       sizeof(outarg.ops_name));
+	}
 
 	if ((inargflags & FUSE_REQUEST_TIMEOUT) && se->conn.request_timeout) {
 		outargflags |= FUSE_REQUEST_TIMEOUT;
@@ -3399,6 +3403,54 @@ int fuse_req_get_payload(fuse_req_t req, char **payload, size_t *payload_sz,
 }
 #endif
 
+static void _do_get_fmap(fuse_req_t req, const fuse_ino_t nodeid,
+			 const void *op_in, const void *in_payload)
+{
+	(void)op_in;
+	(void)in_payload;
+
+	if (req->se->op.get_fmap)
+		req->se->op.get_fmap(req, nodeid, 0);
+	else
+		fuse_reply_err(req, ENOSYS);
+}
+
+static void do_get_fmap(fuse_req_t req, const fuse_ino_t nodeid,
+			const void *inarg)
+{
+	(void)inarg;
+
+	if (req->se->op.get_fmap)
+		req->se->op.get_fmap(req, nodeid, 0);
+	else
+		fuse_reply_err(req, ENOSYS);
+}
+
+static void _do_get_daxdev(fuse_req_t req, const fuse_ino_t nodeid,
+			   const void *op_in, const void *in_payload)
+{
+	(void)nodeid;
+	(void)in_payload;
+	const struct fuse_get_daxdev_in *arg = op_in;
+
+	if (req->se->op.get_daxdev)
+		req->se->op.get_daxdev(req, arg->daxdev_index);
+	else
+		fuse_reply_err(req, ENOSYS);
+}
+
+static void do_get_daxdev(fuse_req_t req, const fuse_ino_t nodeid,
+			  const void *inarg)
+{
+	(void)nodeid;
+	const struct fuse_get_daxdev_in *arg = inarg;
+
+	if (req->se->op.get_daxdev)
+		req->se->op.get_daxdev(req, arg->daxdev_index);
+	else
+		fuse_reply_err(req, ENOSYS);
+}
+
 static struct {
 	void (*func)(fuse_req_t req, const fuse_ino_t node, const void *arg);
 	const char *name;
@@ -3451,6 +3503,8 @@ static struct {
 	[FUSE_COPY_FILE_RANGE_64] = { do_copy_file_range_64, "COPY_FILE_RANGE_64" },
 	[FUSE_LSEEK]	   = { do_lseek,       "LSEEK"	     },
 	[FUSE_STATX]	   = { do_statx,       "STATX"	     },
+	[FUSE_GET_FMAP]	   = { do_get_fmap,    "GET_FMAP"    },
+	[FUSE_GET_DAXDEV]  = { do_get_daxdev,  "GET_DAXDEV"  },
 	[CUSE_INIT]	   = { cuse_lowlevel_init, "CUSE_INIT"   },
 };
 
@@ -3507,6 +3561,8 @@ static struct {
 	[FUSE_COPY_FILE_RANGE_64]	= { _do_copy_file_range_64, "COPY_FILE_RANGE_64" },
 	[FUSE_LSEEK]		= { _do_lseek,		"LSEEK" },
 	[FUSE_STATX]		= { _do_statx,		"STATX" },
+	[FUSE_GET_FMAP]		= { _do_get_fmap,	"GET_FMAP" },
+	[FUSE_GET_DAXDEV]	= { _do_get_daxdev,	"GET_DAXDEV" },
 	[CUSE_INIT]		= { _cuse_lowlevel_init, "CUSE_INIT" },
 };
 

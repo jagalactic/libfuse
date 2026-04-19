@@ -1342,6 +1342,34 @@ struct fuse_lowlevel_ops {
 	 */
 	void (*statx)(fuse_req_t req, fuse_ino_t ino, int flags, int mask,
 		      struct fuse_file_info *fi);
+
+	/**
+	 * Get file mapping metadata for DAX fmap.
+	 *
+	 * The reply should contain a fuse_get_fmap_out header followed by
+	 * an opaque blob that the BPF dax_fmap_parse() program interprets.
+	 *
+	 * Valid replies:
+	 *   fuse_reply_buf
+	 *   fuse_reply_err
+	 *
+	 * @param req request handle
+	 * @param ino the inode number
+	 * @param size maximum response size
+	 */
+	void (*get_fmap)(fuse_req_t req, fuse_ino_t ino, size_t size);
+
+	/**
+	 * Get DAX device info by index.
+	 *
+	 * Valid replies:
+	 *   fuse_reply_buf (with fuse_get_daxdev_out)
+	 *   fuse_reply_err
+	 *
+	 * @param req request handle
+	 * @param daxdev_index device index from the fmap
+	 */
+	void (*get_daxdev)(fuse_req_t req, uint32_t daxdev_index);
 };
 
 /**

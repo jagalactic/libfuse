@@ -663,6 +663,8 @@ enum fuse_opcode {
 	FUSE_TMPFILE		= 51,
 	FUSE_STATX		= 52,
 	FUSE_COPY_FILE_RANGE_64	= 53,
+	FUSE_GET_FMAP		= 54,
+	FUSE_GET_DAXDEV		= 55,
 
 	/* CUSE specific operations */
 	CUSE_INIT		= 4096,
@@ -925,7 +927,8 @@ struct fuse_init_out {
 	uint32_t	flags2;
 	uint32_t	max_stack_depth;
 	uint16_t	request_timeout;
-	uint16_t	unused[11];
+	uint16_t	unused[3];
+	char		ops_name[16];
 };
 
 #define CUSE_INIT_INFO_MAX 4096
@@ -1299,6 +1302,22 @@ struct fuse_uring_cmd_req {
 	/* queue the command is for (queue index) */
 	uint16_t qid;
 	uint8_t padding[6];
+};
+
+/* FUSE DAX fmap opcodes */
+
+struct fuse_get_fmap_out {
+	uint32_t	meta_size;
+	uint32_t	reserved;
+};
+
+struct fuse_get_daxdev_in {
+	uint32_t	daxdev_index;
+	uint32_t	reserved;
+};
+
+struct fuse_get_daxdev_out {
+	char		name[256];
 };
 
 #endif /* _LINUX_FUSE_H */
