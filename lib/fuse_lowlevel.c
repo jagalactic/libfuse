@@ -592,6 +592,27 @@ int fuse_passthrough_open(fuse_req_t req, int fd)
 	return ret;
 }
 
+int fuse_daxdev_open(fuse_req_t req, int fd, int devindex)
+{
+	struct fuse_backing_map map = { .fd = fd, .daxdev_index = devindex };
+	int ret;
+
+	ret = ioctl(req->se->fd, FUSE_DEV_IOC_DAXDEV_OPEN, &map);
+	if (ret < 0) {
+		fuse_log(FUSE_LOG_ERR, "fuse: daxdev_open(index=%d): %s\n",
+			 devindex, strerror(errno));
+		return 0;
+	}
+
+	/*
+	 * DAXDEV_OPEN registers the daxdev by index and returns 0 on success
+	 * (unlike BACKING_OPEN, which returns a positive backing id). Report
+	 * success as a positive value so callers keep the ">0 == success,
+	 * 0 == failure" convention.
+	 */
+	return ret > 0 ? ret : 1;
+}
+
 int fuse_passthrough_close(fuse_req_t req, int backing_id)
 {
 	int ret;

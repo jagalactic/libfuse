@@ -1509,6 +1509,19 @@ int fuse_passthrough_open(fuse_req_t req, int fd);
 int fuse_passthrough_close(fuse_req_t req, int backing_id);
 
 /**
+ * Pass a famfs DAX device into the kernel for an open reply
+ *
+ * Registers a dax device (by fd) with the kernel via the backing-open
+ * ioctl so that famfs/fuse can map files backed by it.
+ *
+ * @param req request handle
+ * @param fd dax device file descriptor
+ * @param devindex daxdev index to associate with the backing fd
+ * @return positive backing id for success, 0 for failure
+ */
+int fuse_daxdev_open(fuse_req_t req, int fd, int devindex);
+
+/**
  * Reply with open parameters
  *
  * currently the following members of 'fi' are used:

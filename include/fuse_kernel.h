@@ -242,17 +242,14 @@
  *  - add FUSE_NOTIFY_PRUNE
  *
  *  7.46
- *    - Add FUSE_DAX_FMAP capability - ability to handle in-kernel fsdax maps
- *    - Add the following structures for the GET_FMAP message reply components:
- *      - struct fuse_famfs_simple_ext
- *      - struct fuse_famfs_iext
- *      - struct fuse_famfs_fmap_header
- *    - Add the following structs for the GET_DAXDEV message and reply
- *      - struct fuse_get_daxdev_in
- *      - struct fuse_get_daxdev_out
- *    - Add the following enumerated types
- *      - enum fuse_famfs_file_type
- *      - enum famfs_ext_type
+ *  - Add FUSE_DAX_FMAP capability - ability to handle in-kernel fsdax maps
+ *  - Add the following structures for the GET_FMAP message reply components:
+ *    - struct fuse_famfs_simple_ext
+ *    - struct fuse_famfs_iext
+ *    - struct fuse_famfs_fmap_header
+ *  - Add the following enumerated types
+ *    - enum fuse_famfs_file_type
+ *    - enum famfs_ext_type
  */
 
 #ifndef _LINUX_FUSE_H
@@ -461,7 +458,7 @@ struct fuse_file_lock {
  * FUSE_OVER_IO_URING: Indicate that client supports io-uring
  * FUSE_REQUEST_TIMEOUT: kernel supports timing out requests.
  *			 init_out.request_timeout contains the timeout (in secs)
- * FUSE_DAX_FMAP:        kernel supports dev_dax_iomap (aka famfs) fmaps
+ * FUSE_DAX_FMAP: kernel supports dev_dax_iomap (aka famfs) fmaps
  */
 #define FUSE_ASYNC_READ		(1 << 0)
 #define FUSE_POSIX_LOCKS	(1 << 1)
@@ -1148,7 +1145,10 @@ struct fuse_notify_prune_out {
 struct fuse_backing_map {
 	int32_t		fd;
 	uint32_t	flags;
-	uint64_t	padding;
+	union {
+		uint64_t	padding;
+		uint64_t	daxdev_index;	/* FUSE_DEV_IOC_DAXDEV_OPEN */
+	};
 };
 
 /* Device ioctls: */
@@ -1158,6 +1158,8 @@ struct fuse_backing_map {
 					     struct fuse_backing_map)
 #define FUSE_DEV_IOC_BACKING_CLOSE	_IOW(FUSE_DEV_IOC_MAGIC, 2, uint32_t)
 #define FUSE_DEV_IOC_SYNC_INIT		_IO(FUSE_DEV_IOC_MAGIC, 3)
+#define FUSE_DEV_IOC_DAXDEV_OPEN	_IOW(FUSE_DEV_IOC_MAGIC, 4, \
+					     struct fuse_backing_map)
 
 struct fuse_lseek_in {
 	uint64_t	fh;
