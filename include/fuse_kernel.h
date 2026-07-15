@@ -1334,7 +1334,14 @@ struct fuse_uring_cmd_req {
 #define FAMFS_FMAP_VERSION 1
 
 #define FAMFS_FMAP_MAX 32768 /* Largest supported fmap message */
-#define FUSE_FAMFS_MAX_EXTENTS 32
+/*
+ * Upper bound on the number of simple extents in one GET_FMAP fmap. A striped
+ * file is unrolled to one extent per chunk, so this caps the striped-file size
+ * and, with the header + extent sizes, the largest GET_FMAP reply buffer the
+ * kernel will kvmalloc for the size-probe retry. 524288 extents => ~1 TiB per
+ * striped file at a 2 MiB chunk, and a ~12 MiB max reply buffer. Tunable.
+ */
+#define FUSE_FAMFS_MAX_EXTENTS 524288
 #define FUSE_FAMFS_MAX_STRIPS 32
 
 enum fuse_famfs_file_type {
@@ -1370,7 +1377,14 @@ struct fuse_famfs_fmap_header {
 	uint16_t fmap_version;
 	uint32_t ext_type; /* enum famfs_log_ext_type */
 	uint32_t nextents;
-	uint32_t reserved0;
+	/*
+	 * Total size of the fmap message in bytes (header + all extents). The
+	 * server always sets it. If the kernel's reply buffer (whose size the
+	 * server gets from the request's fuse_getxattr_in.size) is too small,
+	 * the server replies with only this header and fmap_size tells the
+	 * kernel how large a buffer to reallocate before retrying.
+	 */
+	uint32_t fmap_size;
 	uint64_t file_size;
 	uint64_t reserved1;
 };
