@@ -121,7 +121,8 @@ struct fuse_file_info {
 	/** struct fuse_file_info api and abi flags  */
 	uint64_t compat_flags;
 
-	uint64_t reserved[2];
+	uint64_t backing_id_64;
+	uint64_t reserved[1];
 };
 
 /**
@@ -518,9 +519,9 @@ struct fuse_loop_config_v1 {
 #define FUSE_CAP_ALLOW_IDMAP (1ULL << 32)
 
 /**
- * handle files that use famfs dax fmaps
+ * Use server allocated 64 bit backing IDs
  */
-#define FUSE_CAP_DAX_FMAP (1UL << 33)
+#define FUSE_CAP_PASSTHROUGH_V2 (1ULL << 33)
 
 /**
  * Ioctl flags
